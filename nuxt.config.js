@@ -27,7 +27,7 @@ export default {
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
-    'nuxt-universal-storage'
+    ['cookie-universal-nuxt', { alias: 'cookies' }]
   ],
 
   axios: {
