@@ -10,7 +10,7 @@ export default {
     ],
     link: [
       { rel: 'icon', href: '/img/favicon.png' },
-      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Hind+Siliguri:300,700|Roboto:400,500,700' }
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Hind+Siliguri:300,700|Roboto:300,500,700' }
     ]
   },
 
@@ -21,17 +21,11 @@ export default {
     '@/static/css/default.css'
   ],
 
-  plugins: [
-  ],
-
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
-    'nuxt-universal-storage'
+    ['cookie-universal-nuxt', { alias: 'cookies' }]
   ],
-
-  axios: {
-  },
 
   build: {
     extend(config, ctx) {

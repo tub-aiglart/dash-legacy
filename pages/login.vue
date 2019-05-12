@@ -28,6 +28,7 @@
 <script>
 export default {
   layout: 'basic',
+  middleware: 'authorized',
   data() {
     return {
       error: null
@@ -38,6 +39,8 @@ export default {
       const username = document.getElementById('username')
       const password = document.getElementById('password')
 
+      this.reset()
+
       if (username.value === '' && password.value === '') {
         this.error = 'You need to insert a username as well as a password!'
       } else if (username.value === '') {
@@ -45,7 +48,7 @@ export default {
       } else if (password.value === '') {
         this.error = 'You need to insert a password!'
       } else {
-        this.disable()
+        this.toggle()
         const result = await this.$axios.$request({
           baseURL: 'http://localhost:1945',
           url: '/authorize',
@@ -54,24 +57,51 @@ export default {
             'Authorization': btoa(`${username.value}:${password.value}`),
             'Content-Type': 'application/json'
           },
-          withCredentials: true
+          validateStatus: function (status) {
+            return status < 500
+          }
         })
 
-        this.$storage.setUniversal('user', result)
+        if (result) {
+          if (result.code) {
+            switch (result.code) {
+              case 404:
+                this.error = 'You need to insert a valid username!'
+                break
+              case 401:
+                this.error = 'You need to insert a valid password!'
+                break
+              default:
+                this.error = 'An unexpected error occurred!'
+            }
+          } else if (result.id) {
+            this.$cookies.set('user', result, {
+              path: '/',
+              maxAge: 60 * 60 * 24 * 7
+            })
+            this.$store.commit('set', result.token)
+            this.$router.push('/')
+          } else {
+            this.error = 'An unexpected error occurred!'
+          }
+        } else {
+          this.error = 'An unexpected error occurred!'
+        }
+
+        this.toggle()
       }
     },
     reset() {
       this.error = null
     },
-    disable() {
-      this.reset()
+    toggle() {
       const username = document.getElementById('username')
       const password = document.getElementById('password')
       const button = document.getElementById('button')
-      username.disabled = true
-      password.disabled = true
-      button.disabled = true
-      button.innerText = 'Loading'
+      username.disabled = !username.disabled
+      password.disabled = !password.disabled
+      button.disabled = !button.disabled
+      button.innerText = (button.innerText === 'Login' ? 'Loading' : 'Login')
     }
   }
 }
